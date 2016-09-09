@@ -16,9 +16,15 @@ from SOAPpy import SOAPProxy
 
 # To view soap request/response set SOAPpy.Config.debug = 1
 SOAPpy.Config.debug = 0
+version = "3.5.0"
+
+if len(sys.argv) < 3:
+    print "Usage: python <executable_name> <serverIP> \"<accessToken>\""
+    print "example: python DemoAddServiceProvider.py 192.168.0.2 \"1|V_pmPvEm25-HrqAzERx_nvJbBvNs~q3F|1|v-gntT4GFH-UCUX0EM2_r9XTVDrw~qCF\""
+    sys.exit(1)
 
 # Authentication data
-ACCESS_TOKEN = "CHANGEME"
+ACCESS_TOKEN = sys.argv[2]
 
 # Start constructing the Header
 soapHeader = SOAPpy.Types.headerType()
@@ -32,7 +38,7 @@ credentials = authenticationTemplate % (ACCESS_TOKEN)
 soapHeader.userCredentials = SOAPpy.Types.headerType(credentials)
 
 # the namespace for the user credentials
-soapHeader.userCredentials._ns = "http://4psa.com/HeaderData.xsd/3.0.0"
+soapHeader.userCredentials._ns = "http://4psa.com/HeaderData.xsd/" + version
 
 soapHeader.userCredentials.userCredentials = SOAPpy.Types.untypedType(credentials)
 
@@ -44,13 +50,13 @@ soapBody = SOAPpy.Types.untypedType("")
 soapBody._name = "ns2:GetChargingPlans" 
 
 # Set namespaces
-soapBody._setAttr("xmlns:ns2", "http://4psa.com/BillingMessages.xsd/3.0.0")
+soapBody._setAttr("xmlns:ns2", "http://4psa.com/BillingMessages.xsd/" + version)
 
 # Set endpoint
-endpoint = "https://voipnow2demo.4psa.com/soap2/billing_agent.php"
+endpoint = "https://" + str(sys.argv[1]) + "/soap2/billing_agent.php"
 
 # Set soapaction
-soapaction = "http://4psa.com/Billing/3.0.0:getChargingPlansIn"
+soapaction = "http://4psa.com/Billing/" + version + ":getChargingPlansIn"
 
 # Set service connection
 server = SOAPProxy(endpoint, noroot = 1, soapaction = soapaction, header = soapHeader)
@@ -78,8 +84,12 @@ if len(chargingPlans) != 0:
 bodyTemplate = """
       <ns3:name>%s</ns3:name>
       <ns3:login>%s</ns3:login>
+      <ns3:firstName>%s</ns3:firstName>
+      <ns3:lastName>%s</ns3:lastName>
+      <ns3:email>%s</ns3:email>
       <ns3:password>%s</ns3:password>
-      <ns3:country>%s</ns3:country>"""
+      <ns3:country>%s</ns3:country>
+      <ns3:company>%s</ns3:company>"""
 
 if chargingPlanID != None:
 	bodyTemplate += """
@@ -88,26 +98,30 @@ if chargingPlanID != None:
 # Service Provider data
 name = "SPPython" + str(random.randint(1, 1000))
 login = "SPPython" + str(random.randint(1, 1000))
+firstname = "FirstnamePython" + str(random.randint(1, 1000))
+lastname = "LastNamePython" + str(random.randint(1, 1000))
+email = "Email" + str(random.randint(1, 1000)) + "@example.com"
 password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10))
 country = "us"
+company = "test_company"
 
 # Filling in the template above with the service provider data
 if chargingPlanID != None:
-	body = bodyTemplate % (name, login, password, country, chargingPlanID)
+	body = bodyTemplate % (name, login, firstname, lastname, email, password, country, company, chargingPlanID)
 else:
-	body = bodyTemplate % (name, login, password, country)
+	body = bodyTemplate % (name, login, firstname, lastname, email, password, country, company)
 soapBody = SOAPpy.Types.untypedType(body)
 soapBody._name = "ns2:AddServiceProvider" 
 
 # Set namespaces
-soapBody._setAttr("xmlns:ns2", "http://4psa.com/ServiceProviderMessages.xsd/3.0.0")
-soapBody._setAttr("xmlns:ns3", "http://4psa.com/ServiceProviderData.xsd/3.0.0")
+soapBody._setAttr("xmlns:ns2", "http://4psa.com/ServiceProviderMessages.xsd/" + version)
+soapBody._setAttr("xmlns:ns3", "http://4psa.com/ServiceProviderData.xsd/" + version)
 
 # Set endpoint
-endpoint = "https://voipnow2demo.4psa.com/soap2/sp_agent.php"
+endpoint = "https://" + str(sys.argv[1]) + "/soap2/sp_agent.php"
 
 # Set soapaction
-soapaction = "http://4psa.com/ServiceProvider/3.0.0:addServiceProviderIn"
+soapaction = "http://4psa.com/ServiceProvider/" + version + ":addServiceProviderIn"
 
 # Set service connection
 server = SOAPProxy(endpoint, noroot = 1, soapaction = soapaction, header = soapHeader)

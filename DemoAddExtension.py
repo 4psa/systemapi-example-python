@@ -16,9 +16,15 @@ from SOAPpy import SOAPProxy
 
 # To view soap request/response set SOAPpy.Config.debug = 1
 SOAPpy.Config.debug = 0
+version = "3.5.0"
+
+if len(sys.argv) < 3:
+    print "Usage: python <executable_name> <serverIP> \"<accessToken>\""
+    print "example: python DemoAddServiceProvider.py 192.168.0.2 \"1|V_pmPvEm25-HrqAzERx_nvJbBvNs~q3F|1|v-gntT4GFH-UCUX0EM2_r9XTVDrw~qCF\""
+    sys.exit(1)
 
 # Authentication data
-ACCESS_TOKEN = "CHANGEME"
+ACCESS_TOKEN = sys.argv[2]
 
 # Start constructing the Header
 soapHeader = SOAPpy.Types.headerType()
@@ -32,7 +38,7 @@ credentials = authenticationTemplate % (ACCESS_TOKEN)
 soapHeader.userCredentials = SOAPpy.Types.headerType(credentials)
 
 # the namespace for the user credentials
-soapHeader.userCredentials._ns = "http://4psa.com/HeaderData.xsd/3.0.0"
+soapHeader.userCredentials._ns = "http://4psa.com/HeaderData.xsd/" + version
 
 soapHeader.userCredentials.userCredentials = SOAPpy.Types.untypedType(credentials)
 
@@ -44,13 +50,13 @@ soapBody = SOAPpy.Types.untypedType("")
 soapBody._name = "ns2:GetUsers" 
 
 # Set namespaces
-soapBody._setAttr("xmlns:ns2", "http://4psa.com/UserMessages.xsd/3.0.0")
+soapBody._setAttr("xmlns:ns2", "http://4psa.com/UserMessages.xsd/" + version)
 
 # Set endpoint
-endpoint = "https://voipnow2demo.4psa.com/soap2/user_agent.php"
+endpoint = "https://" + str(sys.argv[1]) + "/soap2/user_agent.php"
 
 # Set soapaction
-soapaction = "http://4psa.com/User/3.0.0:getUsersIn"
+soapaction = "http://4psa.com/User/" + version + ":getUsersIn"
 
 # Set service connection
 server = SOAPProxy(endpoint, noroot = 1, soapaction = soapaction, header = soapHeader)
@@ -98,15 +104,15 @@ soapBody = SOAPpy.Types.untypedType(body)
 soapBody._name = "ns2:AddExtension" 
 
 # Set namespaces
-soapBody._setAttr("xmlns:ns2", "http://4psa.com/ExtensionMessages.xsd/3.0.0")
-soapBody._setAttr("xmlns:ns3", "http://4psa.com/ExtensionData.xsd/3.0.0")
-soapBody._setAttr("xmlns:ns4", "http://4psa.com/AccountData.xsd/3.0.0")
+soapBody._setAttr("xmlns:ns2", "http://4psa.com/ExtensionMessages.xsd/" + version)
+soapBody._setAttr("xmlns:ns3", "http://4psa.com/ExtensionData.xsd/" + version)
+soapBody._setAttr("xmlns:ns4", "http://4psa.com/AccountData.xsd/" + version)
 
 # Set endpoint
-endpoint = "https://voipnow2demo.4psa.com/soap2/extension_agent.php"
+endpoint = "https://" + str(sys.argv[1]) + "/soap2/extension_agent.php"
 
 # Set soapaction
-soapaction = "http://4psa.com/Extension/3.0.0:addExtensionIn"
+soapaction = "http://4psa.com/Extension/" + version + ":addExtensionIn"
 
 # Set service connection
 server = SOAPProxy(endpoint, noroot = 1, soapaction = soapaction, header = soapHeader)
